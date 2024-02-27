@@ -1,4 +1,4 @@
-// Import necessary components from React and React Native libraries
+// menu.tsx
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-native';
 
@@ -6,7 +6,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-nati
 const { width } = Dimensions.get('window');
 
 // Define a functional component for the menu screen
-const Menu: React.FC = () => {
+const MenuScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.bannerSpace} />
@@ -57,4 +57,4 @@ const styles = StyleSheet.create({
 });
 
 // Export the component so it can be used in other parts of your app
-export default Menu;
+export default MenuScreen;
