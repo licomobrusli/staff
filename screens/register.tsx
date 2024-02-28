@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, Text, Alert } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { register } from '../config/apiCalls';
+import Buttons from '../config/buttons';
+import fonts from '../config/fonts';
+import SDims from '../config/dimensions';
 
 type Props = {
     navigation: StackNavigationProp<any, any>;
@@ -50,14 +53,14 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 onChangeText={setUsername}
                 value={username}
                 placeholder="Username"
-                placeholderTextColor="#fff"
+                placeholderTextColor="#AD8457" // Adjusted color
             />
             <TextInput
                 style={styles.input}
                 onChangeText={setPassword}
                 value={password}
                 placeholder="Password"
-                placeholderTextColor="#fff"
+                placeholderTextColor="#AD8457" // Adjusted color
                 secureTextEntry={true}
             />
             <TextInput
@@ -65,12 +68,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 onChangeText={setConfirmPassword}
                 value={confirmPassword}
                 placeholder="Confirm Password"
-                placeholderTextColor="#fff"
+                placeholderTextColor="#AD8457" // Adjusted color
                 secureTextEntry={true}
             />
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-                <Text style={styles.buttonText}>Register</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+                <Buttons.ButtonA title="Register" onPress={handleRegister} color="A" />
+                <Buttons.ButtonA title="Back to Login" onPress={() => navigation.goBack()} color="A" />
+            </View>
         </View>
     );
 };
@@ -78,35 +82,30 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'black',
+        backgroundColor: 'black', // Keep or change as necessary
         alignItems: 'center',
         justifyContent: 'center',
     },
     input: {
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-        borderColor: 'white',
-        color: 'white',
-        width: '80%',
+        height: SDims.Height10p,
+        margin: SDims.D12px,
+        borderWidth: SDims.D2px,
+        padding: SDims.D10px,
+        paddingLeft: SDims.D100px,
+        borderColor: '#AD8457', // Adjusted from white to #AD8457
+        width: SDims.Width80p, // Adjust width according to your dimensions config
+        fontSize: fonts.txtCard.fontSize, // Use font size from txtCard
+        fontFamily: fonts.txtCard.fontFamily, // Use font family from txtCard
     },
-    button: {
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        borderColor: 'white',
-        borderWidth: 1,
-        borderRadius: 5,
-        padding: 10,
-        width: '80%',
-        marginTop: 12,
-    },
-    buttonText: {
-        color: 'white',
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+        marginTop: SDims.D20px,
     },
     validationMessage: {
         color: 'red',
-        marginBottom: 10,
+        marginBottom: SDims.D10px,
     },
 });
 
