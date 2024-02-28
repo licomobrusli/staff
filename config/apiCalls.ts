@@ -1,6 +1,20 @@
 // apiCalls.ts
 import api from '../services/api';
 
+export const register = async (username: string, password: string) => {
+    // Implement the API call using your setup (similar to login)
+    try {
+        const response = await api.post('/api/register', {
+            username,
+            password,
+        });
+        return response.data;
+    } catch (error) {
+        // Handle errors
+        throw new Error('Registration failed');
+    }
+};
+
 export const login = async (username: string, password: string) => {
     try {
       const response = await api.post('/api/login', {
