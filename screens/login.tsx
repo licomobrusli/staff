@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, View, Button, Alert } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import LoginModalFail from '../modals/LoginModalFail';
+import LoginModalFail from '../modals/loginModalFail';
 import { login } from '../config/apiCalls';
 
 type Props = {
@@ -30,7 +30,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             console.error('Login failed:', error);
         }
     };
-    
+
     return (
         <View style={styles.container}>
             <View style={styles.bannerContainer}></View>

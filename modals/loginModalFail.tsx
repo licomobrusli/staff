@@ -1,3 +1,4 @@
+// loginModalFail.tsx
 import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import { View, Modal, Text, StyleSheet, TouchableOpacity } from 'react-native';
