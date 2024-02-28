@@ -4,7 +4,7 @@ import { StyleSheet, TextInput, View, TouchableOpacity, Text } from 'react-nativ
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type Props = {
-    navigation: StackNavigationProp<any, any>; // Define the navigation prop type
+    navigation: StackNavigationProp<any, any>;
 };
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {

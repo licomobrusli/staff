@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, TextInput, View, Button, Alert } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import LoginModalFail from '../modals/LoginModalFail';
+import { login } from '../config/apiCalls';
 
 type Props = {
     navigation: StackNavigationProp<any, any>;
@@ -14,26 +15,22 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const [showModal, setShowModal] = useState(false);
 
     const handleLogin = async () => {
-        const response = await fetch('https://yourbackend.com/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password,
-            }),
-        });
-    
-        const data = await response.json();
-    
-        if (data.success) {
-            navigation.navigate('Menu');
-        } else {
+        try {
+            const data = await login(username, password);
+
+            if (data.success) {
+                navigation.navigate('Menu');
+            } else {
+                setShowModal(true);
+            }
+        } catch (error) {
+            // Handle login error
+            // You might want to show a different message or log this error differently
             setShowModal(true);
+            console.error('Login failed:', error);
         }
     };
-
+    
     return (
         <View style={styles.container}>
             <View style={styles.bannerContainer}></View>
