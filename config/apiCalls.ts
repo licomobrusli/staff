@@ -1,26 +1,37 @@
 // apiCalls.ts
 import api from '../services/api';
+import ENV from '../config/host';
+import axios from 'axios';
 
 export const register = async (username: string, password: string) => {
-    // Implement the API call using your setup (similar to login)
     try {
-        const response = await api.post('/api/register', {
+        console.log('Base URL REG:', ENV.API_BASE_URL);
+        console.log('Sending registration request:', { username, password1: password, password2: password });
+        const response = await api.post('/register/', {
             username,
-            password,
+            password1: password,  // Changed from 'password'
+            password2: password,  // Added field to match Django's expected format
         });
+        console.log('Registration response:', response.data);
         return response.data;
     } catch (error) {
-        // Handle errors
-        throw new Error('Registration failed');
+        if (axios.isAxiosError(error)) {
+            console.error('Registration API Error:', error.response?.data);
+            throw new Error(`Registration failed: ${error.response?.data.detail}`);
+        } else {
+            console.error('Unexpected Error:', error);
+            throw new Error('Registration failed');
+        }
     }
 };
 
 export const login = async (username: string, password: string) => {
     try {
-      const response = await api.post('/api/login', {
-        username,
-        password,
-      });
+        console.log('Base URL LOG:', ENV.API_BASE_URL); 
+        const response = await api.post('/register/', {
+            username,
+            password,
+        });        
       return response.data;
     } catch (error) {
       if (error instanceof Error) {
