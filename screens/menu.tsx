@@ -1,19 +1,25 @@
 // menu.tsx
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import performLogout from '../config/logout';
 
-// Get the screen's width to calculate button and space sizes
-const { width } = Dimensions.get('window');
+type Props = {
+    navigation: StackNavigationProp<any, any>;
+};
 
-// Define a functional component for the menu screen
-const MenuScreen: React.FC = () => {
+const MenuScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.bannerSpace} />
 
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Schedule</Text>
+      <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Schedule')} // Adjust 'Schedule' if you use a different name
+      >
+          <Text style={styles.buttonText}>Schedule</Text>
       </TouchableOpacity>
+
 
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Order Edit</Text>
@@ -21,6 +27,18 @@ const MenuScreen: React.FC = () => {
 
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Snake</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={styles.button}
+        onPress={() => navigation.navigate('Login')} // Use the navigation prop to navigate
+      >
+      </TouchableOpacity>
+      <TouchableOpacity 
+        style={styles.button}
+        onPress={() => performLogout(navigation)} // Use the performLogout function when the Log Out button is pressed
+      >
+        <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>
     </View>
   );

@@ -1,3 +1,4 @@
+// register.tsx
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, View, TouchableOpacity, Text } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -31,7 +32,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
         try {
             const data = await register(username, password);
-            if (data.success) {
+            if (data.status === 'success') {
                 navigation.navigate('Login');
             } else {
                 setValidationMessage(data.message || 'Unknown error occurred.'); // Ensure message is always defined
