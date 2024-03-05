@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
+        backgroundColor: 'black',
     },
     tableHeader: {
         flexDirection: 'row',
@@ -76,14 +77,15 @@ const styles = StyleSheet.create({
     headerCell: {
         flex: 1, // Allocate equal space for each header
         fontWeight: 'bold',
-        textAlign: 'center', // Center-align header texts
+        textAlign: 'center',
+        backgroundColor: 'black',
     },
     resourceItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 10,
         padding: 10,
-        backgroundColor: 'lightgrey',
+        backgroundColor: '#AD8457',
     },
     tableCell: {
         flex: 1, // Allocate equal space for each column in the row
