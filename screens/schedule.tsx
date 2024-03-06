@@ -4,16 +4,20 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { getTimeResourcesQueue } from '../config/apiCalls';
 import fonts from '../config/fonts';
 import * as Keychain from 'react-native-keychain';
+import TaskModal from '../modals/taskModal';
 
 interface TimeResource {
     segment: string;
     segment_name: string;
     segment_start: string;
     segment_end: string;
+    segment_params: string;
 }
 
 const ScheduleScreen: React.FC = () => {
     const [timeResources, setTimeResources] = useState<TimeResource[]>([]);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedResource, setSelectedResource] = useState<TimeResource | null>(null);
 
     useEffect(() => {
         const fetchTimeResources = async () => {
@@ -39,6 +43,13 @@ const ScheduleScreen: React.FC = () => {
         return date.toTimeString().substring(0, 5); // HH:MM format
     };
 
+    const handleRowPress = (resource: TimeResource) => {
+        if (resource.segment_params === 'TASKS') {
+            setSelectedResource(resource);
+            setIsModalVisible(true);
+        }
+    };
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.tableHeader}>
@@ -49,7 +60,7 @@ const ScheduleScreen: React.FC = () => {
             </View>
             {timeResources.length > 0 ? (
                 timeResources.map((resource, index) => (
-                    <TouchableOpacity key={index} style={styles.resourceItem}>
+                    <TouchableOpacity key={index} style={styles.resourceItem} onPress={() => handleRowPress(resource)}>
                         <Text style={[fonts.txtList, styles.tableCell]}>{resource.segment}</Text>
                         <Text style={[fonts.txtList, styles.tableCell]}>{resource.segment_name}</Text>
                         <Text style={[fonts.txtList, styles.tableCell]}>{formatTime(resource.segment_start)}</Text>
@@ -58,6 +69,17 @@ const ScheduleScreen: React.FC = () => {
                 ))
             ) : (
                 <Text style={fonts.txtList}>No time resources available</Text>
+            )}
+            {selectedResource && (
+                <TaskModal
+                    isVisible={isModalVisible}
+                    onClose={() => setIsModalVisible(false)}
+                    segment={selectedResource.segment}
+                    segmentName={selectedResource.segment_name}
+                    segmentStart={selectedResource.segment_start}
+                    segmentEnd={selectedResource.segment_end}
+                    segmentParams={selectedResource.segment_params}
+                />
             )}
         </ScrollView>
     );
