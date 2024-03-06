@@ -14,10 +14,13 @@ interface TimeResource {
     segment_end: string;
     segment_params: string;
     order_number: string | null;
+    staff_start: string | null;
+    staff_end: string | null;
 }
 
 const ScheduleScreen: React.FC = () => {
     const [timeResources, setTimeResources] = useState<TimeResource[]>([]);
+    const [activeTimers, setActiveTimers] = useState<{ [key: number]: boolean }>({});
 
     useEffect(() => {
         const fetchTimeResources = async () => {
@@ -37,6 +40,14 @@ const ScheduleScreen: React.FC = () => {
 
         fetchTimeResources();
     }, []);
+
+    const startTimer = (index: number) => {
+        const currentTime = new Date().toISOString(); // Get current time in ISO format
+        const updatedResources = [...timeResources];
+        updatedResources[index].staff_start = currentTime; // Set the start time
+        setTimeResources(updatedResources);
+        setActiveTimers({ ...activeTimers, [index]: true }); // Activate the timer for the clicked row
+    };
 
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
@@ -68,11 +79,20 @@ const ScheduleScreen: React.FC = () => {
                         <TouchableOpacity 
                             style={styles.touchableCell} 
                             onPress={() => {
-                                // Implement what happens when start time is clicked
-                                console.log('Start time clicked', resource.segment_start);
+                                if (resource.staff_start) {
+                                    setActiveTimers({ ...activeTimers, [index]: !activeTimers[index] }); // Toggle timer
+                                } else {
+                                    startTimer(index); // Start new timer
+                                }
                             }}
                         >
-                            <Text style={fonts.txtList}>{formatTime(resource.segment_start)}</Text>
+                            {activeTimers[index] ? (
+                                <Timer initialSeconds={Math.floor((Date.now() - new Date(resource.staff_start!).getTime()) / 1000)} />
+                            ) : (
+                                <Text style={fonts.txtList}>
+                                    {resource.staff_start ? formatTime(resource.staff_start) : formatTime(resource.segment_start)}
+                                </Text>
+                            )}
                         </TouchableOpacity>
                         <TouchableOpacity 
                             style={styles.touchableCell} 

@@ -1,78 +1,61 @@
 // timer.tsx
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet } from 'react-native';
+import fonts from '../config/fonts';
 
 const Timer = ({ initialSeconds = 0 }) => {
     const [seconds, setSeconds] = useState(initialSeconds);
-    const [isActive, setIsActive] = useState(false);
+    const [isActive, setIsActive] = useState(true);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout | null = null;
+        let interval: ReturnType<typeof setInterval> | null = null;
 
         if (isActive) {
             interval = setInterval(() => {
                 setSeconds(seconds => seconds + 1);
             }, 1000);
-        } else if (!isActive && seconds !== 0) {
-            clearInterval(interval as unknown as NodeJS.Timeout);
+        } else if (interval !== null) {
+            clearInterval(interval);
         }
-    
+
         return () => {
-            if (interval) {
+            if (interval !== null) {
                 clearInterval(interval);
             }
         };
     }, [isActive, seconds]);
 
-    const toggle = () => {
+    const toggleTimer = () => {
         setIsActive(!isActive);
-    };
-
-    const reset = () => {
-        setSeconds(0);
-        setIsActive(false);
     };
 
     // Format time for display
     const formatTime = () => {
         const totalSeconds = seconds;
-        const getSeconds = `0${(totalSeconds % 60)}`.slice(-2);
+        const getSeconds = `0${totalSeconds % 60}`.slice(-2);
         const totalMinutes = Math.floor(totalSeconds / 60);
-        const getMinutes = `0${totalMinutes % 60}`.slice(-2);
-        const getHours = `0${Math.floor(totalMinutes / 60)}`.slice(-2);
+        const getMinutes = `0${totalMinutes}`.slice(-2);
 
-        return `${getHours}:${getMinutes}:${getSeconds}`;
+        return `${getMinutes}:${getSeconds}`;
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.timerText}>{formatTime()}</Text>
-            <TouchableOpacity onPress={toggle} style={styles.button}>
-                <Text>{isActive ? 'Pause' : 'Start'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={reset} style={styles.button}>
-                <Text>Reset</Text>
-            </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={toggleTimer} style={styles.container}>
+            <Text style={[fonts.txtList, styles.timerText]}>{formatTime()}</Text>
+        </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  timerText: {
-    fontSize: 30,
-    marginBottom: 30,
-  },
-  button: {
-    borderWidth: 1,
-    borderColor: '#000',
-    padding: 10,
-    borderRadius: 5,
-    margin: 5,
-  }
+    container: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    timerText: {
+        color: 'black',
+        // Additional custom styles for text if necessary, 
+        // otherwise just rely on fonts.txtList
+    }
 });
 
 export default Timer;
