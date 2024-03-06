@@ -16,6 +16,7 @@ interface TimeResource {
     order_number: string | null;
     staff_start: string | null;
     staff_end: string | null;
+    dismissed?: boolean;
 }
 
 const ScheduleScreen: React.FC = () => {
@@ -41,18 +42,45 @@ const ScheduleScreen: React.FC = () => {
         fetchTimeResources();
     }, []);
 
+    const firstActiveTaskIndex = timeResources.findIndex(resource => 
+        resource.segment_params === 'TASKS' && !resource.dismissed
+    );
+
     const startTimer = (index: number) => {
-        const currentTime = new Date().toISOString(); // Get current time in ISO format
+        // Only allow the timer to start if this is the first active 'TASKS' item.
+        if (index === firstActiveTaskIndex) {
+            const currentTime = new Date().toISOString();
+            const updatedResources = [...timeResources];
+            updatedResources[index].staff_start = currentTime;
+            setTimeResources(updatedResources);
+            setActiveTimers({ ...activeTimers, [index]: true });
+        }
+    };
+    
+    const stopTimer = (index: number) => {
         const updatedResources = [...timeResources];
-        updatedResources[index].staff_start = currentTime; // Set the start time
-        setTimeResources(updatedResources);
-        setActiveTimers({ ...activeTimers, [index]: true }); // Activate the timer for the clicked row
+        if (index === firstActiveTaskIndex && updatedResources[index].segment_params === 'TASKS') {
+            if (activeTimers[index]) { // Timer is active
+                const currentTime = new Date().toISOString();
+                updatedResources[index].staff_end = currentTime;
+                setActiveTimers({ ...activeTimers, [index]: false });
+            } else {
+                // If staff_end is already set, then dismiss the task on this click.
+                // This checks if the task has been previously stopped but not yet dismissed.
+                if (updatedResources[index].staff_end) {
+                    updatedResources[index].dismissed = true; // Mark as dismissed, stop any timer action.
+                }
+            }
+            setTimeResources(updatedResources);
+        }
     };
 
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         return date.toTimeString().substring(0, 5); // HH:MM format
     };
+
+    const sortedTimeResources = [...timeResources].sort((a, b) => new Date(a.segment_start).getTime() - new Date(b.segment_start).getTime());
 
     return (
         <ScrollView style={styles.container}>
@@ -62,8 +90,8 @@ const ScheduleScreen: React.FC = () => {
                 <Text style={[fonts.txtList, styles.headerCell]}>Start</Text>
                 <Text style={[fonts.txtList, styles.headerCell]}>End</Text>
                 </View>
-                {timeResources.length > 0 ? timeResources.map((resource, index) => (
-                    <View key={index} style={styles.resourceItem}>
+                {sortedTimeResources.map((resource, index) => (
+                    <View key={index} style={[styles.resourceItem, resource.dismissed ? styles.dismissedItem : {}]}>
                         <TouchableOpacity 
                             style={styles.touchableCell} 
                             onPress={() => {
@@ -77,14 +105,18 @@ const ScheduleScreen: React.FC = () => {
                         </TouchableOpacity>
                         <Text style={[fonts.txtList, styles.tableCell]}>{resource.segment_name}</Text>
                         <TouchableOpacity 
-                            style={styles.touchableCell} 
+                            style={styles.touchableCell}
                             onPress={() => {
-                                if (resource.staff_start) {
-                                    setActiveTimers({ ...activeTimers, [index]: !activeTimers[index] }); // Toggle timer
-                                } else {
-                                    startTimer(index); // Start new timer
+                                // Timer start logic when start area is pressed
+                                if (index === firstActiveTaskIndex && resource.segment_params === 'TASKS') {
+                                    if (resource.staff_start) {
+                                        setActiveTimers({ ...activeTimers, [index]: !activeTimers[index] });
+                                    } else {
+                                        startTimer(index);
+                                    }
                                 }
                             }}
+                            disabled={index !== firstActiveTaskIndex || resource.segment_params !== 'TASKS'}
                         >
                             {activeTimers[index] ? (
                                 <Timer initialSeconds={Math.floor((Date.now() - new Date(resource.staff_start!).getTime()) / 1000)} />
@@ -97,17 +129,22 @@ const ScheduleScreen: React.FC = () => {
                         <TouchableOpacity 
                             style={styles.touchableCell} 
                             onPress={() => {
-                                // Implement what happens when end time is clicked
-                                console.log('End time clicked', resource.segment_end);
+                                // Timer stop logic when stop area is pressed
+                                if (index === firstActiveTaskIndex && resource.segment_params === 'TASKS') {
+                                    stopTimer(index);
+                                }
                             }}
+                            disabled={index !== firstActiveTaskIndex || resource.segment_params !== 'TASKS'}
                         >
-                            <Text style={fonts.txtList}>{formatTime(resource.segment_end)}</Text>
+                            <Text style={fonts.txtList}>
+                                {resource.staff_end ? formatTime(resource.staff_end) : formatTime(resource.segment_end)}
+                            </Text>
                         </TouchableOpacity>
                     </View>
-                )) : (
+                ))}
+                {sortedTimeResources.length === 0 && (
                     <Text style={fonts.txtList}>No time resources available</Text>
                 )}
-
         </ScrollView>
     );
 };
@@ -148,6 +185,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center', // Center content vertically if needed
         alignItems: 'center', // Center content horizontally if needed
         // Add other ViewStyle properties as needed
+    },
+    dismissedItem: {
+        backgroundColor: 'red', // Change color to indicate dismissal.
     },
 });
 
