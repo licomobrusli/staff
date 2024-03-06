@@ -4,20 +4,20 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { getTimeResourcesQueue } from '../config/apiCalls';
 import fonts from '../config/fonts';
 import * as Keychain from 'react-native-keychain';
-import TaskModal from '../modals/taskModal';
+import Timer from '../config/timer';
 
 interface TimeResource {
+    id: number;
     segment: string;
     segment_name: string;
     segment_start: string;
     segment_end: string;
     segment_params: string;
+    order_number: string | null;
 }
 
 const ScheduleScreen: React.FC = () => {
     const [timeResources, setTimeResources] = useState<TimeResource[]>([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedResource, setSelectedResource] = useState<TimeResource | null>(null);
 
     useEffect(() => {
         const fetchTimeResources = async () => {
@@ -43,44 +43,51 @@ const ScheduleScreen: React.FC = () => {
         return date.toTimeString().substring(0, 5); // HH:MM format
     };
 
-    const handleRowPress = (resource: TimeResource) => {
-        if (resource.segment_params === 'TASKS') {
-            setSelectedResource(resource);
-            setIsModalVisible(true);
-        }
-    };
-
     return (
         <ScrollView style={styles.container}>
             <View style={styles.tableHeader}>
-                <Text style={[fonts.txtList, styles.headerCell]}>Segment</Text>
+                <Text style={[fonts.txtList, styles.headerCell]}>Segment / Order</Text>
                 <Text style={[fonts.txtList, styles.headerCell]}>Name</Text>
                 <Text style={[fonts.txtList, styles.headerCell]}>Start</Text>
                 <Text style={[fonts.txtList, styles.headerCell]}>End</Text>
-            </View>
-            {timeResources.length > 0 ? (
-                timeResources.map((resource, index) => (
-                    <TouchableOpacity key={index} style={styles.resourceItem} onPress={() => handleRowPress(resource)}>
-                        <Text style={[fonts.txtList, styles.tableCell]}>{resource.segment}</Text>
+                </View>
+                {timeResources.length > 0 ? timeResources.map((resource, index) => (
+                    <View key={index} style={styles.resourceItem}>
+                        <TouchableOpacity 
+                            style={styles.touchableCell} 
+                            onPress={() => {
+                                // Implement what happens when segment/order is clicked
+                                console.log('Segment/Order clicked', resource.segment, resource.order_number);
+                            }}
+                        >
+                            <Text style={fonts.txtList}>
+                                {resource.order_number || resource.segment}
+                            </Text>
+                        </TouchableOpacity>
                         <Text style={[fonts.txtList, styles.tableCell]}>{resource.segment_name}</Text>
-                        <Text style={[fonts.txtList, styles.tableCell]}>{formatTime(resource.segment_start)}</Text>
-                        <Text style={[fonts.txtList, styles.tableCell]}>{formatTime(resource.segment_end)}</Text>
-                    </TouchableOpacity>
-                ))
-            ) : (
-                <Text style={fonts.txtList}>No time resources available</Text>
-            )}
-            {selectedResource && (
-                <TaskModal
-                    isVisible={isModalVisible}
-                    onClose={() => setIsModalVisible(false)}
-                    segment={selectedResource.segment}
-                    segmentName={selectedResource.segment_name}
-                    segmentStart={selectedResource.segment_start}
-                    segmentEnd={selectedResource.segment_end}
-                    segmentParams={selectedResource.segment_params}
-                />
-            )}
+                        <TouchableOpacity 
+                            style={styles.touchableCell} 
+                            onPress={() => {
+                                // Implement what happens when start time is clicked
+                                console.log('Start time clicked', resource.segment_start);
+                            }}
+                        >
+                            <Text style={fonts.txtList}>{formatTime(resource.segment_start)}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={styles.touchableCell} 
+                            onPress={() => {
+                                // Implement what happens when end time is clicked
+                                console.log('End time clicked', resource.segment_end);
+                            }}
+                        >
+                            <Text style={fonts.txtList}>{formatTime(resource.segment_end)}</Text>
+                        </TouchableOpacity>
+                    </View>
+                )) : (
+                    <Text style={fonts.txtList}>No time resources available</Text>
+                )}
+
         </ScrollView>
     );
 };
@@ -115,6 +122,12 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 16,
+    },
+    touchableCell: {
+        flex: 1, // Maintain layout from your previous styles
+        justifyContent: 'center', // Center content vertically if needed
+        alignItems: 'center', // Center content horizontally if needed
+        // Add other ViewStyle properties as needed
     },
 });
 
