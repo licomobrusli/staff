@@ -23,7 +23,8 @@ interface TimeResource {
 
 const ScheduleScreen: React.FC = () => {
     const [timeResources, setTimeResources] = useState<TimeResource[]>([]);
-    const [activeTimers, setActiveTimers] = useState<{ [key: number]: number }>({});
+    const [activeTimers, setActiveTimers] = useState<{ [key: number]: boolean }>({});
+    const [elapsedTimes, setElapsedTimes] = useState<{ [key: number]: number }>({});
 
     useEffect(() => {
         const fetchTimeResources = async () => {
@@ -39,46 +40,40 @@ const ScheduleScreen: React.FC = () => {
                 console.error('Failed to fetch time resources:', error);
             }
         };
-
         fetchTimeResources();
     }, []);
 
     const firstActiveTaskIndex = timeResources.findIndex(resource => 
         resource.segment_params === 'TASKS' && !resource.dismissed
     );
-
+    
     const startTimer = (index: number) => {
         if (index === firstActiveTaskIndex) {
             const currentTime = new Date().toISOString();
             const updatedResources = [...timeResources];
             updatedResources[index].staff_start = currentTime;
             setTimeResources(updatedResources);
-            setActiveTimers({ ...activeTimers, [index]: 0 }); // Timer starts, initialize duration to 0
+            setActiveTimers({ ...activeTimers, [index]: true });
         }
     };
-
+    
     const stopTimer = async (index: number) => {
-        let updatedResources = [...timeResources];
+        const updatedResources = [...timeResources];
         if (index === firstActiveTaskIndex && updatedResources[index].segment_params === 'TASKS') {
-            if (!updatedResources[index].staff_end) {
-                // If the timer has not been stopped yet, stop it
+            if (activeTimers[index]) {
                 const currentTime = new Date().toISOString();
                 updatedResources[index].staff_end = currentTime;
-                
-                if (typeof activeTimers[index] === 'number') {
-                    updatedResources[index].staff_timer = activeTimers[index];
-                    const newTimers = { ...activeTimers };
-                    delete newTimers[index]; // Remove the timer for this task
-                    setActiveTimers(newTimers);
-                }
-    
-                // Do not dismiss the task yet
+                let elapsedTime = elapsedTimes[index] || 0; // Default to 0 if not previously set
+                updatedResources[index].staff_timer = elapsedTime;
+                setElapsedTimes({ ...elapsedTimes, [index]: elapsedTime }); // Update elapsed time
+                setActiveTimers({ ...activeTimers, [index]: false }); // Stop the timer
             } else {
-                // If the timer has already been stopped, dismiss the task
-                updatedResources[index].dismissed = true;
+                if (!updatedResources[index].dismissed) {
+                    updatedResources[index].dismissed = true;
+                }
             }
     
-            if (updatedResources[index].staff_start && updatedResources[index].staff_end && updatedResources[index].dismissed === true) {
+            if (updatedResources[index].dismissed) {
                 const credentials = await Keychain.getGenericPassword();
                 if (credentials) {
                     try {
@@ -87,7 +82,7 @@ const ScheduleScreen: React.FC = () => {
                             updatedResources[index].id,
                             updatedResources[index].staff_start!,
                             updatedResources[index].staff_end!,
-                            updatedResources[index].staff_timer!
+                            updatedResources[index].staff_timer!,
                         );
                     } catch (error) {
                         console.error('Failed to update time resource:', error);
@@ -96,8 +91,8 @@ const ScheduleScreen: React.FC = () => {
             }
             setTimeResources(updatedResources);
         }
-    };    
-
+    };
+    
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         // Adjust for Madrid timezone, considering Madrid is GMT+1 (or GMT+2 during Daylight Saving Time)
@@ -167,29 +162,41 @@ const ScheduleScreen: React.FC = () => {
                     </TouchableOpacity>
                     <Text style={[fonts.txtList, styles.tableCell]}>{resource.segment_name}</Text>
                     <TouchableOpacity 
-                        style={styles.touchableCell} 
+                        style={styles.touchableCell}
                         onPress={() => {
-                            if (index === firstActiveTaskIndex && resource.segment_params === 'TASKS' && !resource.staff_start) {
-                                startTimer(index);
+                            // Timer start logic when start area is pressed
+                            if (index === firstActiveTaskIndex && resource.segment_params === 'TASKS') {
+                                if (resource.staff_start) {
+                                    setActiveTimers({ ...activeTimers, [index]: !activeTimers[index] });
+                                } else {
+                                    startTimer(index);
+                                }
                             }
                         }}
                         disabled={index !== firstActiveTaskIndex || resource.segment_params !== 'TASKS'}
                     >
-                        {/* Timer replaces start time only when active, otherwise show start time */}
-                        {activeTimers[index] !== undefined ? (
-                            <Timer initialSeconds={activeTimers[index]} />
+                        {activeTimers[index] ? (
+                            <Timer initialSeconds={Math.floor((Date.now() - new Date(resource.staff_start!).getTime()) / 1000)} />
                         ) : (
-                            <Text style={fonts.txtList}>{resource.staff_start ? formatTime(resource.staff_start) : formatTime(resource.segment_start)}</Text>
+                            <Text style={fonts.txtList}>
+                                {resource.staff_start ? formatTime(resource.staff_start) : formatTime(resource.segment_start)}
+                            </Text>
                         )}
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={styles.touchableCell} 
-                        onPress={() => stopTimer(index)}
+                        onPress={() => {
+                            // Timer stop logic when stop area is pressed
+                            if (index === firstActiveTaskIndex && resource.segment_params === 'TASKS') {
+                                stopTimer(index);
+                            }
+                        }}
                         disabled={index !== firstActiveTaskIndex || resource.segment_params !== 'TASKS'}
                     >
-                        <Text style={fonts.txtList}>{resource.staff_end ? formatTime(resource.staff_end) : formatTime(resource.segment_end)}</Text>
+                        <Text style={fonts.txtList}>
+                            {resource.staff_end ? formatTime(resource.staff_end) : formatTime(resource.segment_end)}
+                        </Text>
                     </TouchableOpacity>
-                    {/* Ensure no duplicate Timer component is rendered here */}
                 </View>
             ))}
             {sortedTimeResources.length === 0 && (
