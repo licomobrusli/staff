@@ -31,7 +31,13 @@ const ScheduleScreen: React.FC = () => {
             try {
                 const credentials = await Keychain.getGenericPassword();
                 if (credentials) {
-                    const data = await getTimeResourcesQueue(credentials.password);
+                    let data = await getTimeResourcesQueue(credentials.password);
+                    data = data.map((resource: TimeResource) => ({
+                        ...resource,
+                        dismissed: resource.staff_timer !== null ? true : resource.dismissed,
+                        segment_start: resource.staff_timer !== null ? resource.staff_start : resource.segment_start,
+                        segment_end: resource.staff_timer !== null ? resource.staff_end : resource.segment_end,
+                    }));                    
                     setTimeResources(data);
                 } else {
                     console.error('No credentials stored');
@@ -65,9 +71,7 @@ const ScheduleScreen: React.FC = () => {
                 updatedResources[index].staff_end = currentTime;
                 
                 let elapsedTime = elapsedTimes[index] || 0; // Default to 0 if not previously set
-                console.log('Elapsed time:', elapsedTime);
                 updatedResources[index].staff_timer = elapsedTime;
-                console.log('Updated resource:', updatedResources[index]);
                 setElapsedTimes({ ...elapsedTimes, [index]: elapsedTime }); // Update elapsed time
                 setActiveTimers({ ...activeTimers, [index]: false }); // Stop the timer
             } else {
@@ -104,8 +108,11 @@ const ScheduleScreen: React.FC = () => {
         return madridTime.toTimeString().substring(0, 5); // Return time in HH:MM format
     };
 
-    const sortedTimeResources = [...timeResources].sort((a, b) => 
-        new Date(a.segment_start).getTime() - new Date(b.segment_start).getTime()
+    const sortedTimeResources = [...timeResources].map(resource => ({
+        ...resource,
+        actual_start: resource.segment_start
+    })).sort((a, b) => 
+        new Date(a.actual_start).getTime() - new Date(b.actual_start).getTime()
     );
 
     // Styles definition should be here before using in the return statement
