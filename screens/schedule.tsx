@@ -63,8 +63,11 @@ const ScheduleScreen: React.FC = () => {
             if (activeTimers[index]) {
                 const currentTime = new Date().toISOString();
                 updatedResources[index].staff_end = currentTime;
+                
                 let elapsedTime = elapsedTimes[index] || 0; // Default to 0 if not previously set
+                console.log('Elapsed time:', elapsedTime);
                 updatedResources[index].staff_timer = elapsedTime;
+                console.log('Updated resource:', updatedResources[index]);
                 setElapsedTimes({ ...elapsedTimes, [index]: elapsedTime }); // Update elapsed time
                 setActiveTimers({ ...activeTimers, [index]: false }); // Stop the timer
             } else {
@@ -164,7 +167,6 @@ const ScheduleScreen: React.FC = () => {
                     <TouchableOpacity 
                         style={styles.touchableCell}
                         onPress={() => {
-                            // Timer start logic when start area is pressed
                             if (index === firstActiveTaskIndex && resource.segment_params === 'TASKS') {
                                 if (resource.staff_start) {
                                     setActiveTimers({ ...activeTimers, [index]: !activeTimers[index] });
@@ -176,7 +178,15 @@ const ScheduleScreen: React.FC = () => {
                         disabled={index !== firstActiveTaskIndex || resource.segment_params !== 'TASKS'}
                     >
                         {activeTimers[index] ? (
-                            <Timer initialSeconds={Math.floor((Date.now() - new Date(resource.staff_start!).getTime()) / 1000)} />
+                            <Timer 
+                                initialSeconds={elapsedTimes[index] || Math.floor((Date.now() - new Date(resource.staff_start!).getTime()) / 1000)}
+                                onUpdate={(newTime) => {
+                                    // Defer the state update to after the current execution context
+                                    setTimeout(() => {
+                                        setElapsedTimes(prevElapsedTimes => ({...prevElapsedTimes, [index]: newTime}));
+                                    }, 0);
+                                }}
+                            />
                         ) : (
                             <Text style={fonts.txtList}>
                                 {resource.staff_start ? formatTime(resource.staff_start) : formatTime(resource.segment_start)}
