@@ -16,6 +16,7 @@ interface TimeResource {
     order_number: string | null;
     staff_start: string | null;
     staff_end: string | null;
+    staff_timer: number | null;
     dismissed?: boolean;
 }
 
@@ -77,7 +78,10 @@ const ScheduleScreen: React.FC = () => {
 
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toTimeString().substring(0, 5); // HH:MM format
+        // Adjust for Madrid timezone, considering Madrid is GMT+1 (or GMT+2 during Daylight Saving Time)
+        const offset = date.getTimezoneOffset() * 60000; // Convert offset to milliseconds
+        const madridTime = new Date(date.getTime() - offset + (3600000 * 1)); // Adjust for GMT+1
+        return madridTime.toTimeString().substring(0, 5); // Return time in HH:MM format
     };
 
     const sortedTimeResources = [...timeResources].sort((a, b) => new Date(a.segment_start).getTime() - new Date(b.segment_start).getTime());

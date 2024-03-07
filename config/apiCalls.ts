@@ -99,3 +99,19 @@ export const getTimeResourcesQueue = async (token: string) => {
         throw new Error('Failed to fetch time resources');
     }
 };
+
+export const updateTimeResource = async (token: string, timeResourceId: number, staffStart: string, staffEnd: string, staffTimer: number) => {
+    try {
+        const response = await api.patch(`/user-time-resources/${timeResourceId}/`, {
+            staff_start: staffStart,
+            staff_end: staffEnd,
+            staff_timer: staffTimer
+        }, {
+            headers: { Authorization: `Token ${token}` }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating time resource:', error);
+        throw new Error('Failed to update time resource');
+    }
+};
