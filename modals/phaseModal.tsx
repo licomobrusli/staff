@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { getOrderAssignments } from '../config/apiCalls';
+import * as Keychain from 'react-native-keychain';
 
 interface PhaseModalProps {
     onClose: () => void;
@@ -23,12 +24,22 @@ const PhaseModal: React.FC<PhaseModalProps> = ({ onClose, orderNumber }) => {
     useEffect(() => {
         const fetchAssignments = async () => {
             if (orderNumber) {
-                const fetchedAssignments = await getOrderAssignments(orderNumber);
-                setAssignments(fetchedAssignments);
+                try {
+                    const credentials = await Keychain.getGenericPassword(); // Retrieve stored credentials
+                    if (credentials) {
+                        const fetchedAssignments = await getOrderAssignments(credentials.password, orderNumber);
+                        setAssignments(fetchedAssignments);
+                    } else {
+                        console.error('No credentials stored');
+                    }
+                } catch (error) {
+                    console.error('Error fetching assignments:', error);
+                }
             }
         };
         fetchAssignments();
     }, [orderNumber]);
+    
 
     return (
         <Modal

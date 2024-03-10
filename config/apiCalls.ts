@@ -116,10 +116,11 @@ export const updateTimeResource = async (token: string, timeResourceId: number, 
     }
 };
 
-// Add the getOrderAssignments function
-export const getOrderAssignments = async (orderNumber: string) => {
+export const getOrderAssignments = async (token: string, orderNumber: string) => {
     try {
-        const response = await api.get(`/assignments/${orderNumber}/`); // Adjust the URL as necessary
+        const response = await api.get(`/assignments/${orderNumber}/`, {
+            headers: { Authorization: `Token ${token}` }
+        });
         return response.data;
     } catch (error) {
         console.error('Error fetching assignments:', error);
