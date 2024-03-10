@@ -115,3 +115,14 @@ export const updateTimeResource = async (token: string, timeResourceId: number, 
         throw new Error('Failed to update time resource');
     }
 };
+
+// Add the getOrderAssignments function
+export const getOrderAssignments = async (orderNumber: string) => {
+    try {
+        const response = await api.get(`/assignments/${orderNumber}/`); // Adjust the URL as necessary
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching assignments:', error);
+        throw new Error('Failed to fetch assignments');
+    }
+};

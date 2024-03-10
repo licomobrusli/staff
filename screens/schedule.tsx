@@ -28,6 +28,8 @@ const ScheduleScreen: React.FC = () => {
     const [elapsedTimes, setElapsedTimes] = useState<{ [key: number]: number }>({});
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedResource, setSelectedResource] = useState<TimeResource | null>(null);
+    const [orderNumber, setOrderNumber] = useState<string | null>(null);
+
 
     useEffect(() => {
         const fetchTimeResources = async () => {
@@ -160,11 +162,13 @@ const ScheduleScreen: React.FC = () => {
         },
     });
 
+    // Inside ScheduleScreen component
     const openModal = (resource: TimeResource) => {
         setSelectedResource(resource);
+        setOrderNumber(resource.order_number ?? null);
         setModalVisible(true);
     };
-
+    
     return (
         <ScrollView style={styles.container}>
             <View style={styles.tableHeader}>
@@ -227,7 +231,6 @@ const ScheduleScreen: React.FC = () => {
             {sortedTimeResources.length === 0 && (
                 <Text style={fonts.txtList}>No time resources available</Text>
             )}
-
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -236,8 +239,7 @@ const ScheduleScreen: React.FC = () => {
                     setModalVisible(!modalVisible);
                 }}
             >
-                {/* Since PhaseModal now does not expect a 'resource' prop, remove it */}
-                <PhaseModal onClose={() => setModalVisible(false)} />
+                <PhaseModal onClose={() => setModalVisible(false)} orderNumber={selectedResource?.order_number ?? null} />
             </Modal>
         </ScrollView>
     );
