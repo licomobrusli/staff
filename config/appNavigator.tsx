@@ -19,7 +19,11 @@ const AppNavigator = () => {
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
                 <Stack.Screen name="Menu" component={MenuScreen} />
-                <Stack.Screen name="Schedule" component={ScheduleScreen} />
+                <Stack.Screen 
+                    name="Schedule" 
+                    component={ScheduleScreen} 
+                    options={{ headerShown: true }} // Enable the header only for this screen
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );

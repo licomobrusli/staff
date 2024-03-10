@@ -1,8 +1,9 @@
 // menu.tsx
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import performLogout from '../config/logout';
+import { SCHEDImage, SNAKEImage, LOGOUTImage } from '../images'; // Adjust the path if necessary
 
 type Props = {
     navigation: StackNavigationProp<any, any>;
@@ -11,66 +12,47 @@ type Props = {
 const MenuScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <View style={styles.bannerSpace} />
-
       <TouchableOpacity
-          style={styles.button}
           onPress={() => navigation.navigate('Schedule')} // Adjust 'Schedule' if you use a different name
+          style={styles.touchableArea}
       >
-          <Text style={styles.buttonText}>Schedule</Text>
-      </TouchableOpacity>
-
-
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Order Edit</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Snake</Text>
+          <Image source={SCHEDImage} style={styles.icon} />
       </TouchableOpacity>
 
       <TouchableOpacity 
-        style={styles.button}
-        onPress={() => navigation.navigate('Login')} // Use the navigation prop to navigate
+          onPress={() => navigation.navigate('SnakeGame')} // Replace 'SnakeGame' with actual navigation target
+          style={styles.touchableArea}
       >
+          <Image source={SNAKEImage} style={styles.icon} />
       </TouchableOpacity>
+
       <TouchableOpacity 
-        style={styles.button}
         onPress={() => performLogout(navigation)} // Use the performLogout function when the Log Out button is pressed
+        style={styles.touchableArea}
       >
-        <Text style={styles.buttonText}>Log Out</Text>
+        <Image source={LOGOUTImage} style={styles.icon} />
       </TouchableOpacity>
     </View>
   );
 };
 
-// Define the styles for the screen and components
+// Updated styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#AD8457',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bannerSpace: {
-    width: '100%',
-    height: '33%', // Approx 1/3 of the total screen height
-    backgroundColor: 'black', // This will be the background for your banner image
+  touchableArea: {
+    // Optional: Add padding or margin if needed
+    margin: 20, // Adjust the spacing between the buttons
   },
-  button: {
-    width: '80%', // Buttons are 80% of the screen width
-    margin: 10,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: 'white',
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 20,
+  icon: {
+    width: 400, // Set the new width for the icons
+    height: 400, // Set the new height for the icons
+    margin: 100, // Adjust the spacing between the icons
+    resizeMode: 'contain', // Adjust if needed to maintain aspect ratio
   },
 });
 
