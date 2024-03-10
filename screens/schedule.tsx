@@ -1,11 +1,12 @@
 // schedule.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { getTimeResourcesQueue } from '../config/apiCalls';
 import fonts from '../config/fonts';
 import * as Keychain from 'react-native-keychain';
 import Timer from '../config/timer';
 import { updateTimeResource } from '../config/apiCalls';
+import PhaseModal from '../modals/phaseModal';
 
 interface TimeResource {
     id: number;
@@ -25,6 +26,8 @@ const ScheduleScreen: React.FC = () => {
     const [timeResources, setTimeResources] = useState<TimeResource[]>([]);
     const [activeTimers, setActiveTimers] = useState<{ [key: number]: boolean }>({});
     const [elapsedTimes, setElapsedTimes] = useState<{ [key: number]: number }>({});
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedResource, setSelectedResource] = useState<TimeResource | null>(null);
 
     useEffect(() => {
         const fetchTimeResources = async () => {
@@ -157,6 +160,11 @@ const ScheduleScreen: React.FC = () => {
         },
     });
 
+    const openModal = (resource: TimeResource) => {
+        setSelectedResource(resource);
+        setModalVisible(true);
+    };
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.tableHeader}>
@@ -167,7 +175,7 @@ const ScheduleScreen: React.FC = () => {
             </View>
             {sortedTimeResources.map((resource, index) => (
                 <View key={index} style={[styles.resourceItem, resource.dismissed ? styles.dismissedItem : {}]}>
-                    <TouchableOpacity style={styles.touchableCell} onPress={() => {/* Segment/order clicked logic here */}}>
+                    <TouchableOpacity style={styles.touchableCell} onPress={() => openModal(resource)}>
                         <Text style={fonts.txtList}>{resource.order_number || resource.segment}</Text>
                     </TouchableOpacity>
                     <Text style={[fonts.txtList, styles.tableCell]}>{resource.segment_name}</Text>
@@ -219,6 +227,18 @@ const ScheduleScreen: React.FC = () => {
             {sortedTimeResources.length === 0 && (
                 <Text style={fonts.txtList}>No time resources available</Text>
             )}
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                {/* Since PhaseModal now does not expect a 'resource' prop, remove it */}
+                <PhaseModal onClose={() => setModalVisible(false)} />
+            </Modal>
         </ScrollView>
     );
 };
