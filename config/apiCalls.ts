@@ -118,12 +118,18 @@ export const updateTimeResource = async (token: string, timeResourceId: number, 
 
 export const getOrderAssignments = async (token: string, orderNumber: string) => {
     try {
-        const response = await api.get(`/assignments/${orderNumber}/`, {
+        console.log('Sending request to backend with parameters:', { orderNumber });
+        console.log('Headers:', { Authorization: `Token ${token}` });
+
+        const response = await api.get(`/assignments/`, {
+            params: { order_number: orderNumber }, // Changed from orderNumber to order_number
             headers: { Authorization: `Token ${token}` }
         });
+        
         return response.data;
     } catch (error) {
         console.error('Error fetching assignments:', error);
         throw new Error('Failed to fetch assignments');
     }
 };
+

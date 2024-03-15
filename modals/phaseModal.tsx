@@ -25,7 +25,7 @@ const PhaseModal: React.FC<PhaseModalProps> = ({ onClose, orderNumber }) => {
         const fetchAssignments = async () => {
             if (orderNumber) {
                 try {
-                    const credentials = await Keychain.getGenericPassword(); // Retrieve stored credentials
+                    const credentials = await Keychain.getGenericPassword();
                     if (credentials) {
                         const fetchedAssignments = await getOrderAssignments(credentials.password, orderNumber);
                         setAssignments(fetchedAssignments);
